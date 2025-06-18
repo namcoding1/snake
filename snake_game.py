@@ -1,6 +1,6 @@
 import curses
 import random
-import time
+import curses.ascii
 
 # 게임 설정
 HEIGHT = 20
@@ -8,6 +8,9 @@ WIDTH = 40
 SNAKE_CHAR = '#'
 FOOD_CHAR = '*'
 ENEMY_CHAR = 'X'
+NORMAL_TIMEOUT = 100  # ms
+BOOST_TIMEOUT = 50
+BOOST_DURATION = 5  # iterations
 
 
 def create_food(snake, enemy=None):
@@ -32,7 +35,7 @@ def create_enemy(snake, food):
 
 def game_loop(stdscr):
     stdscr.nodelay(True)
-    stdscr.timeout(100)
+    boost_ticks = 0
 
     snake = [(HEIGHT // 2, WIDTH // 2 + i) for i in range(3)]
     direction = curses.KEY_LEFT
@@ -42,7 +45,10 @@ def game_loop(stdscr):
     score = 0
 
     while True:
+        stdscr.timeout(BOOST_TIMEOUT if boost_ticks > 0 else NORMAL_TIMEOUT)
         key = stdscr.getch()
+        if 0 <= key <= 31:
+            boost_ticks = BOOST_DURATION
         if key in [curses.KEY_UP, curses.KEY_DOWN, curses.KEY_LEFT, curses.KEY_RIGHT]:
             if (
                 (direction == curses.KEY_UP and key != curses.KEY_DOWN) or
@@ -122,6 +128,8 @@ def game_loop(stdscr):
             pass
 
         stdscr.refresh()
+        if boost_ticks > 0:
+            boost_ticks -= 1
 
 
 def main(stdscr):

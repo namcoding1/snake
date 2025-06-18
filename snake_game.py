@@ -33,6 +33,15 @@ def create_enemy(snake, food):
             return enemy
 
 
+def draw_borders(stdscr):
+    for x in range(WIDTH):
+        stdscr.addch(0, x, '#')
+        stdscr.addch(HEIGHT - 1, x, '#')
+    for y in range(HEIGHT):
+        stdscr.addch(y, 0, '#')
+        stdscr.addch(y, WIDTH - 1, '#')
+
+
 def game_loop(stdscr):
     stdscr.nodelay(True)
     boost_ticks = 0
@@ -43,6 +52,14 @@ def game_loop(stdscr):
     enemy = create_enemy(snake, None)
     food = create_food(snake, enemy)
     score = 0
+
+    stdscr.clear()
+    draw_borders(stdscr)
+    for y, x in snake:
+        stdscr.addch(y, x, SNAKE_CHAR)
+    stdscr.addch(food[0], food[1], FOOD_CHAR)
+    stdscr.addch(enemy[0], enemy[1], ENEMY_CHAR)
+    stdscr.refresh()
 
     while True:
         stdscr.timeout(BOOST_TIMEOUT if boost_ticks > 0 else NORMAL_TIMEOUT)
@@ -86,6 +103,7 @@ def game_loop(stdscr):
             (enemy_y, enemy_x) not in snake and
             (enemy_y, enemy_x) != food
         ):
+            stdscr.addch(enemy[0], enemy[1], ' ')
             enemy = (enemy_y, enemy_x)
 
         # 벽, 자기 자신, 적군과 충돌 시 게임 종료
@@ -102,28 +120,20 @@ def game_loop(stdscr):
         if new_head == food:
             score += 1
             food = create_food(snake, enemy)
+            stdscr.addch(food[0], food[1], FOOD_CHAR)
         else:
-            snake.pop()
+            tail = snake.pop()
+            stdscr.addch(tail[0], tail[1], ' ')
 
-        stdscr.clear()
-
-        # 경계 그리기
-        for x in range(WIDTH):
-            stdscr.addch(0, x, '#')
-            stdscr.addch(HEIGHT - 1, x, '#')
-        for y in range(HEIGHT):
-            stdscr.addch(y, 0, '#')
-            stdscr.addch(y, WIDTH - 1, '#')
-
-        stdscr.addch(food[0], food[1], FOOD_CHAR)
+        # 적군 그리기
         stdscr.addch(enemy[0], enemy[1], ENEMY_CHAR)
 
-        for y, x in snake:
-            stdscr.addch(y, x, SNAKE_CHAR)
+        # 뱀 그리기
+        stdscr.addch(new_head[0], new_head[1], SNAKE_CHAR)
 
         score_text = 'Score: {}'.format(score)
         try:
-            stdscr.addstr(0, WIDTH + 2, score_text)
+            stdscr.addstr(0, WIDTH + 2, score_text + '  ')
         except curses.error:
             pass
 

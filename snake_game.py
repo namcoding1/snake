@@ -21,6 +21,15 @@ def main(stdscr):
     stdscr.nodelay(True)
     stdscr.timeout(100)
 
+    max_y, max_x = stdscr.getmaxyx()
+    if max_y < HEIGHT or max_x < WIDTH:
+        stdscr.clear()
+        msg = f"Terminal must be at least {HEIGHT}x{WIDTH}"
+        stdscr.addstr(0, 0, msg)
+        stdscr.refresh()
+        stdscr.getch()
+        return
+
     # 초기 뱀 설정
     snake = [(HEIGHT // 2, WIDTH // 2 + i) for i in range(3)]
     direction = curses.KEY_LEFT

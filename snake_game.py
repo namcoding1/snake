@@ -88,7 +88,11 @@ def main(stdscr):
             stdscr.addch(y, x, SNAKE_CHAR)
 
         score_text = 'Score: {}'.format(score)
-        stdscr.addstr(0, WIDTH + 2, score_text)
+        try:
+            stdscr.addstr(0, WIDTH + 2, score_text)
+        except curses.error:
+            # 터미널 크기가 충분하지 않을 때는 점수 표시를 생략
+            pass
 
         stdscr.refresh()
 
